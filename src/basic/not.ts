@@ -1,4 +1,4 @@
-import { Bool } from '../main';
+import type { Bool } from '../main';
 
 export function not(a: Bool): Bool {
   return 0;
