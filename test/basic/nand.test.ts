@@ -1,6 +1,6 @@
-import { nand } from '../src/nand';
+import runLogicTests from '../runLogicTests';
 
-import runLogicTests from './runLogicTests';
+import { nand } from '@/basic/nand';
 
 runLogicTests('NAND', nand, [
   [[0, 0], 1],
