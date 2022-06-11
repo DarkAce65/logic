@@ -9,7 +9,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vitest --ui"
+    "test": "cross-env BROWSER=none vitest --ui"
   },
   "lint-staged": {
     "*.ts": "eslint --max-warnings=0",
@@ -20,6 +20,7 @@
     "@typescript-eslint/eslint-plugin": "^5.27.1",
     "@typescript-eslint/parser": "^5.27.1",
     "@vitest/ui": "^0.14.2",
+    "cross-env": "^7.0.3",
     "eslint": "^8.17.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
