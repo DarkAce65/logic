@@ -1,3 +1,1 @@
-export const a = 'world';
-
-console.log('hello', a);
+export type Bool = 0 | 1;
