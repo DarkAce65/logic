@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "scripts": {
     "prepare": "husky install",
-    "eslint:fix": "eslint --fix \"*.config.{js,ts}\" \"src/**/*.ts\" \"test/**/*.ts\"",
-    "prettier:write": "prettier --write .eslintrc.js \"*.config.{js,ts}\" tsconfig.json index.html \"src/**/*.ts\" \"test/**/*.ts\"",
+    "eslint:fix": "eslint --fix \"*.config.{js,ts}\" \"src/**/*.ts\" \"test/**/*.ts\" \"plugins/**/*.ts\"",
+    "prettier:write": "prettier --write .eslintrc.js \"*.config.{js,ts}\" tsconfig.json tsconfig.node.json index.html \"src/**/*.ts\" \"test/**/*.ts\" \"plugins/**/*.ts\"",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
