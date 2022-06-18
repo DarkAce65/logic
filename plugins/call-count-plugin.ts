@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 import type { Plugin } from 'vite';
 
 import {
@@ -24,30 +26,46 @@ const findCallExpressions = (node: Node, source: SourceFile): CallExpression[] =
 };
 
 function callCountPlugin(): Plugin {
+  const srcDir = path.join(__dirname, '../src');
   const callCounts = {};
 
   return {
-    name: 'call-count',
-    transform(code, id) {
-      if (id.includes('node_modules')) {
+    name: 'call-counts',
+    transform(contents, id) {
+      const relative = path.relative(srcDir, id);
+      if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
         return;
       }
 
-      const source = createSourceFile(id, code, ScriptTarget.ESNext);
+      let newContents: string;
+
+      const source = createSourceFile(id, contents, ScriptTarget.ESNext);
       source.forEachChild((sourceNode) => {
         if (isFunctionDeclaration(sourceNode)) {
-          callCounts[sourceNode.name.text] = {};
-          for (const callExpression of findCallExpressions(sourceNode, source)) {
-            const functionName = callExpression.expression.getText(source);
-            if (!callCounts[sourceNode.name.text][functionName]) {
-              callCounts[sourceNode.name.text][functionName] = 0;
-            }
-            callCounts[sourceNode.name.text][functionName] += 1;
+          const functionName = sourceNode.name.text;
+          const callsInjectionPoint = `${functionName}.gateCounts = {};`;
+          if (!contents.includes(callsInjectionPoint)) {
+            return;
           }
+
+          callCounts[functionName] = {};
+          for (const callExpression of findCallExpressions(sourceNode, source)) {
+            const callName = callExpression.expression.getText(source);
+            if (!callCounts[functionName][callName]) {
+              callCounts[functionName][callName] = 0;
+            }
+            callCounts[functionName][callName] += 1;
+          }
+          newContents = (newContents || contents).replace(
+            callsInjectionPoint,
+            `${functionName}.gateCounts = ${JSON.stringify(callCounts[functionName])};`
+          );
         }
       });
 
-      console.log(callCounts);
+      if (newContents !== undefined) {
+        return { code: newContents };
+      }
     },
   };
 }
