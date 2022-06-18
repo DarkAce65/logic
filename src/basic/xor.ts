@@ -7,3 +7,4 @@ import { or } from './or';
 export function xor(a: Bool, b: Bool): Bool {
   return and(or(a, b), nand(a, b));
 }
+xor.gateCounts = {};
