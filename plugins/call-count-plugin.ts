@@ -23,11 +23,11 @@ const findCallExpressions = (node: Node, source: SourceFile): CallExpression[] =
   return expressions;
 };
 
-function callGraphPlugin(): Plugin {
+function callCountPlugin(): Plugin {
   const callCounts = {};
 
   return {
-    name: 'call-graph',
+    name: 'call-count',
     transform(code, id) {
       if (id.includes('node_modules')) {
         return;
@@ -52,4 +52,4 @@ function callGraphPlugin(): Plugin {
   };
 }
 
-export default callGraphPlugin;
+export default callCountPlugin;
