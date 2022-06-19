@@ -12,6 +12,7 @@ import { nand } from './basic/nand';
 import { not } from './basic/not';
 import { or } from './basic/or';
 import { xor } from './basic/xor';
+import { debounce } from './utils/debounce';
 
 import './main.scss';
 
@@ -166,3 +167,10 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
 
 const render = renderGateVisualizations(document.querySelector('#container')!);
 render('xor');
+
+window.addEventListener(
+  'resize',
+  debounce(() => {
+    render('xor');
+  }, 250)
+);
