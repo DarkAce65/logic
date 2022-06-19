@@ -28,7 +28,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
 
   const nodes = svg.append('g');
   const links = svg.append('g');
-  const text = svg.append('g');
+  const text = svg.append('g').attr('font-size', 16);
 
   element.appendChild(svg.node()!);
 
@@ -65,7 +65,6 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .text((d) => d.value);
 
     text
-      .attr('font-size', 16)
       .selectAll('text')
       .data(sankeyLayout.nodes)
       .join('text')
@@ -73,16 +72,31 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .attr('y', (d) => (d.y1! + d.y0!) / 2)
       .attr('dy', '0.35em')
       .attr('text-anchor', (d) => (d.x0! < width / 2 ? 'start' : 'end'))
-      .text((d) => `${d.gate} ${d.totalNANDGates}`);
+      .text((d) => `${d.displayText || d.gate} ${d.totalNANDGates}`);
   };
 };
 
-const render = renderGateVisualizations(document.querySelector('#container')!);
-render('xor');
+document.addEventListener('DOMContentLoaded', () => {
+  const render = renderGateVisualizations(document.querySelector('#sankeyContainer')!);
+  const gateSelector = document.createElement('select');
+  for (const gate of Object.keys(sankeyLayouts)) {
+    const option = document.createElement('option');
+    option.value = gate;
+    option.text = gate;
+    gateSelector.appendChild(option);
+  }
+  document.querySelector('#controls')!.appendChild(gateSelector);
+  gateSelector.value = 'nand';
 
-window.addEventListener(
-  'resize',
-  debounce(() => {
-    render('xor');
-  }, 250)
-);
+  render(gateSelector.value);
+  gateSelector.addEventListener('change', (evt) => {
+    render((evt.target as HTMLInputElement).value);
+  });
+
+  window.addEventListener(
+    'resize',
+    debounce(() => {
+      render(gateSelector.value);
+    }, 250)
+  );
+});
