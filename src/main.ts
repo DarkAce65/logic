@@ -1,10 +1,4 @@
-import {
-  SankeyGraph,
-  SankeyLinkMinimal,
-  SankeyNodeMinimal,
-  sankey,
-  sankeyLinkHorizontal,
-} from 'd3-sankey';
+import { sankeyLinkHorizontal } from 'd3-sankey';
 import { create as d3Create } from 'd3-selection';
 
 import { and } from './basic/and';
@@ -12,6 +6,7 @@ import { nand } from './basic/nand';
 import { not } from './basic/not';
 import { or } from './basic/or';
 import { xor } from './basic/xor';
+import { buildSankeyLayoutGenerators } from './buildSankeyLayoutGenerators';
 import { debounce } from './utils/debounce';
 
 import './main.scss';
@@ -23,90 +18,7 @@ export interface WithGateCounts {
 
 const ALL_GATES: { [gate: string]: WithGateCounts } = { and, nand, not, or, xor };
 
-interface GateGraphData {
-  gate: string;
-  totalNANDGates: number;
-  childGateGraphs?: GateGraphData[];
-}
-const buildAllGateGraphData = (): { [gate: string]: GateGraphData } => {
-  const allGateGraphData: { [gate: string]: GateGraphData } = {};
-
-  const buildGateGraphData = (gate: string, gateCount = 1): GateGraphData => {
-    if (!Object.prototype.hasOwnProperty.call(ALL_GATES, gate)) {
-      return { gate, totalNANDGates: 0 };
-    } else if (gate === 'nand') {
-      return { gate, totalNANDGates: gateCount };
-    }
-
-    let totalNANDGates = 0;
-    const childGateGraphs: GateGraphData[] = [];
-    for (const childGate of Object.keys(ALL_GATES[gate].gateCounts)) {
-      const childGateCount = gateCount * ALL_GATES[gate].gateCounts[childGate];
-      const childGateGraphData = buildGateGraphData(childGate, childGateCount);
-      totalNANDGates += childGateGraphData.totalNANDGates;
-      childGateGraphs.push(childGateGraphData);
-    }
-
-    return { gate, totalNANDGates, childGateGraphs };
-  };
-
-  for (const gate of Object.keys(ALL_GATES)) {
-    allGateGraphData[gate] = buildGateGraphData(gate);
-  }
-
-  return allGateGraphData;
-};
-
-interface Node {
-  gate: string;
-  totalNANDGates: number;
-}
-interface Link {}
-interface SankeyLayouts {
-  [gate: string]: (width: number, height: number) => SankeyGraph<Node, Link>;
-}
-const buildSankeyLayouts = (allGateGraphData: { [gate: string]: GateGraphData }): SankeyLayouts => {
-  const sankeyLayouts: SankeyLayouts = {};
-
-  for (const gate of Object.keys(allGateGraphData)) {
-    const nodesById: { [gate: string]: SankeyNodeMinimal<Node, Link> & Node } = {};
-    const nodes: (SankeyNodeMinimal<Node, Link> & Node)[] = [];
-    const links: (SankeyLinkMinimal<Node, Link> & Link)[] = [];
-
-    const traverseGraph = (graph: GateGraphData) => {
-      if (Object.prototype.hasOwnProperty.call(nodesById, graph.gate)) {
-        nodesById[graph.gate].totalNANDGates += graph.totalNANDGates;
-      } else {
-        const node = { gate: graph.gate, totalNANDGates: graph.totalNANDGates };
-        nodes.push(node);
-        nodesById[graph.gate] = node;
-      }
-      if (graph.childGateGraphs) {
-        for (const childGraph of graph.childGateGraphs) {
-          links.push({
-            source: graph.gate,
-            target: childGraph.gate,
-            value: childGraph.totalNANDGates,
-          });
-          traverseGraph(childGraph);
-        }
-      }
-    };
-    traverseGraph(allGateGraphData[gate]);
-
-    sankeyLayouts[gate] = (width, height) =>
-      sankey<Node, Link>()
-        .nodeId((node) => node.gate)
-        .extent([
-          [50, 50],
-          [width - 50, height - 50],
-        ])({ nodes, links });
-  }
-
-  return sankeyLayouts;
-};
-
-const sankeyLayouts = buildSankeyLayouts(buildAllGateGraphData());
+const sankeyLayouts = buildSankeyLayoutGenerators(ALL_GATES);
 
 const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void) => {
   let width = element.clientWidth;
