@@ -2,35 +2,21 @@ import { sankeyLinkHorizontal } from 'd3-sankey';
 import 'd3-transition';
 import { create as d3Create, select } from 'd3-selection';
 
-import { and } from './basic/and';
-import { nand } from './basic/nand';
-import { not } from './basic/not';
-import { or } from './basic/or';
-import { xor } from './basic/xor';
 import {
   SankeyGateLink,
   SankeyGateNode,
   buildSankeyLayoutGenerators,
 } from './buildSankeyLayoutGenerators';
+import { ALL_GATES, FLATTENED_GATES } from './gates';
 import { debounce } from './utils/debounce';
 
 import './main.scss';
-
-export type Bool = 0 | 1;
-interface GateFunction<T extends Bool[]> {
-  (...args: T): Bool;
-}
-export interface WithGateCounts<T extends Bool[] = Bool[]> extends GateFunction<T> {
-  gateCounts: { [gate: string]: number };
-}
-
-const ALL_GATES: { [gate: string]: WithGateCounts } = { and, nand, not, or, xor };
 
 const TEXT_PADDING = 10;
 const ANIMATION_DURATION = 500;
 const EXIT_ANIMATION_DURATION = 200;
 
-const sankeyLayouts = buildSankeyLayoutGenerators(ALL_GATES);
+const sankeyLayouts = buildSankeyLayoutGenerators(FLATTENED_GATES);
 
 let updateGraph: (gate: string) => void;
 const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void) => {
@@ -183,11 +169,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const render = renderGateVisualizations(document.querySelector('#sankeyContainer')!);
 
   const gateSelector = document.createElement('select');
-  for (const gate of Object.keys(sankeyLayouts)) {
-    const option = document.createElement('option');
-    option.value = gate;
-    option.text = gate.toUpperCase();
-    gateSelector.appendChild(option);
+  for (const categoryOrGate of Object.keys(ALL_GATES)) {
+    if (typeof ALL_GATES[categoryOrGate] === 'function') {
+      const option = document.createElement('option');
+      option.value = categoryOrGate;
+      option.text = categoryOrGate.toUpperCase();
+      gateSelector.appendChild(option);
+    } else {
+      const optionGroup = document.createElement('optgroup');
+      optionGroup.label = categoryOrGate;
+      for (const gate of Object.keys(ALL_GATES[categoryOrGate])) {
+        const option = document.createElement('option');
+        option.value = gate;
+        option.text = gate.toUpperCase();
+        optionGroup.appendChild(option);
+      }
+      gateSelector.appendChild(optionGroup);
+    }
   }
   document.querySelector('#controls')!.appendChild(gateSelector);
 

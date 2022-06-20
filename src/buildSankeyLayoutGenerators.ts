@@ -1,6 +1,6 @@
 import { SankeyGraph, SankeyLink, SankeyNode, sankey } from 'd3-sankey';
 
-import { WithGateCounts } from './main';
+import { WithGateCounts } from './gates';
 
 const SANKEY_PADDING = 20;
 

@@ -1,4 +1,4 @@
-import type { Bool } from '../main';
+import type { Bool } from '../gates';
 
 import { and } from './and';
 import { nand } from './nand';
