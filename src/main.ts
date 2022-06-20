@@ -198,8 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
     render(gate);
   };
 
+  gateSelector.value = '';
   updateGraph('nand');
-
   gateSelector.addEventListener('change', (evt) => {
     render((evt.target as HTMLInputElement).value);
   });
