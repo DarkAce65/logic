@@ -7,7 +7,11 @@ import { nand } from './basic/nand';
 import { not } from './basic/not';
 import { or } from './basic/or';
 import { xor } from './basic/xor';
-import { buildSankeyLayoutGenerators } from './buildSankeyLayoutGenerators';
+import {
+  SankeyGateLink,
+  SankeyGateNode,
+  buildSankeyLayoutGenerators,
+} from './buildSankeyLayoutGenerators';
 import { debounce } from './utils/debounce';
 
 import './main.scss';
@@ -50,7 +54,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .style('height', `${height}px`);
 
     nodes
-      .selectAll<SVGRectElement, typeof sankeyLayout.nodes[number]>('rect')
+      .selectAll<SVGRectElement, SankeyGateNode>('rect')
       .data(sankeyLayout.nodes, (d) => d.gate)
       .join(
         (enter) =>
@@ -76,13 +80,11 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .style('opacity', 1);
 
     const paths = links
-      .selectAll<SVGPathElement, typeof sankeyLayout.links[number]>('path')
+      .selectAll<SVGPathElement, SankeyGateLink>('path')
       .data(
         sankeyLayout.links,
         ({ source, target }) =>
-          `${typeof source === 'string' || typeof source === 'number' ? source : source.gate}-${
-            typeof target === 'string' || typeof target === 'number' ? target : target.gate
-          }`
+          `${(source as SankeyGateNode).gate}-${(target as SankeyGateNode).gate}`
       )
       .join(
         (enter) => {
@@ -106,7 +108,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .attr('stroke-opacity', 0.2);
 
     text
-      .selectAll<SVGTextElement, typeof sankeyLayout.nodes[number]>('text')
+      .selectAll<SVGTextElement, SankeyGateNode>('text')
       .data(sankeyLayout.nodes, (d) => d.gate)
       .join(
         (enter) =>

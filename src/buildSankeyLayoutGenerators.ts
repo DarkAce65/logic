@@ -1,4 +1,4 @@
-import { SankeyGraph, SankeyLinkMinimal, SankeyNodeMinimal, sankey } from 'd3-sankey';
+import { SankeyGraph, SankeyLink, SankeyNode, sankey } from 'd3-sankey';
 
 import { WithGateCounts } from './main';
 
@@ -41,16 +41,18 @@ const buildAllGateGraphData = (gatesWithCounts: {
   return allGateGraphData;
 };
 
-interface Node {
+interface GateNode {
   gate: string;
   displayText?: string;
   totalNANDGates: number;
 }
-interface Link {}
+interface GateLink {}
 interface SankeyLayoutGenerators {
-  [gate: string]: (width: number, height: number) => SankeyGraph<Node, Link>;
+  [gate: string]: (width: number, height: number) => SankeyGraph<GateNode, GateLink>;
 }
 
+export type SankeyGateNode = SankeyNode<GateNode, GateLink>;
+export type SankeyGateLink = SankeyLink<GateNode, GateLink>;
 export const buildSankeyLayoutGenerators = (gatesWithCounts: {
   [gate: string]: WithGateCounts;
 }): SankeyLayoutGenerators => {
@@ -58,15 +60,15 @@ export const buildSankeyLayoutGenerators = (gatesWithCounts: {
   const sankeyLayouts: SankeyLayoutGenerators = {};
 
   for (const gate of Object.keys(allGateGraphData)) {
-    const nodes: (SankeyNodeMinimal<Node, Link> & Node)[] = [];
-    const links: (SankeyLinkMinimal<Node, Link> & Link)[] = [];
+    const nodes: SankeyGateNode[] = [];
+    const links: SankeyGateLink[] = [];
 
     if (gate === 'nand') {
       nodes.push({ gate: 'in', displayText: 'nand', totalNANDGates: 1 });
       nodes.push({ gate: 'nand', displayText: 'nand', totalNANDGates: 1 });
       links.push({ source: 'in', target: 'nand', value: 1 });
     } else {
-      const nodesById: { [gate: string]: SankeyNodeMinimal<Node, Link> & Node } = {};
+      const nodesById: { [gate: string]: SankeyGateNode } = {};
       const traverseGraph = (graph: GateGraphData) => {
         if (Object.prototype.hasOwnProperty.call(nodesById, graph.gate)) {
           nodesById[graph.gate].totalNANDGates += graph.totalNANDGates;
@@ -89,7 +91,7 @@ export const buildSankeyLayoutGenerators = (gatesWithCounts: {
     }
 
     sankeyLayouts[gate] = (width, height) =>
-      sankey<Node, Link>()
+      sankey<GateNode, GateLink>()
         .nodeId((node) => node.gate)
         .nodeSort((a, b) => b.totalNANDGates - a.totalNANDGates)
         .extent([
