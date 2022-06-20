@@ -113,7 +113,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .on('mouseenter', function (_, d) {
         select(this).attr('stroke-opacity', 0.4);
         tooltip.classed('active', true);
-        tooltip.text(`${d.value} NAND gates`);
+        tooltip.text(d.value === 1 ? `${d.value} NAND gate` : `${d.value} NAND gates`);
       })
       .on('mousemove', function (evt: MouseEvent) {
         tooltip.style('top', `${evt.clientY}px`).style('left', `${evt.clientX + 15}px`);
