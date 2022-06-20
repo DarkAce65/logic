@@ -158,7 +158,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .attr('dy', '0.35em')
       .attr('text-anchor', (d) => (d.x0! < width / 2 ? 'start' : 'end'))
       .style('opacity', 1)
-      .text((d) => `${d.displayText || d.gate} ${d.totalNANDGates}`);
+      .text((d) => `${d.displayText || d.gate.toUpperCase()} ${d.totalNANDGates}`);
   };
 };
 
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
   for (const gate of Object.keys(sankeyLayouts)) {
     const option = document.createElement('option');
     option.value = gate;
-    option.text = gate;
+    option.text = gate.toUpperCase();
     gateSelector.appendChild(option);
   }
   document.querySelector('#controls')!.appendChild(gateSelector);

@@ -64,8 +64,8 @@ export const buildSankeyLayoutGenerators = (gatesWithCounts: {
     const links: SankeyGateLink[] = [];
 
     if (gate === 'nand') {
-      nodes.push({ gate: 'in', displayText: 'nand', totalNANDGates: 1 });
-      nodes.push({ gate: 'nand', displayText: 'nand', totalNANDGates: 1 });
+      nodes.push({ gate: 'in', displayText: 'NAND', totalNANDGates: 1 });
+      nodes.push({ gate: 'nand', displayText: 'NAND', totalNANDGates: 1 });
       links.push({ source: 'in', target: 'nand', value: 1 });
     } else {
       const nodesById: { [gate: string]: SankeyGateNode } = {};
