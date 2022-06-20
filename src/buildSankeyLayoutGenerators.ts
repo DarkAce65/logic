@@ -63,8 +63,8 @@ export const buildSankeyLayoutGenerators = (gatesWithCounts: {
 
     if (gate === 'nand') {
       nodes.push({ gate: 'in', displayText: 'nand', totalNANDGates: 1 });
-      nodes.push({ gate: 'out', displayText: 'nand', totalNANDGates: 1 });
-      links.push({ source: 'in', target: 'out', value: 1 });
+      nodes.push({ gate: 'nand', displayText: 'nand', totalNANDGates: 1 });
+      links.push({ source: 'in', target: 'nand', value: 1 });
     } else {
       const nodesById: { [gate: string]: SankeyNodeMinimal<Node, Link> & Node } = {};
       const traverseGraph = (graph: GateGraphData) => {
@@ -91,6 +91,7 @@ export const buildSankeyLayoutGenerators = (gatesWithCounts: {
     sankeyLayouts[gate] = (width, height) =>
       sankey<Node, Link>()
         .nodeId((node) => node.gate)
+        .nodeSort((a, b) => b.totalNANDGates - a.totalNANDGates)
         .extent([
           [SANKEY_PADDING, SANKEY_PADDING],
           [width - SANKEY_PADDING, height - SANKEY_PADDING],
