@@ -78,13 +78,19 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
             .style('opacity', 0),
         (update) => update,
         (exit) =>
-          exit.transition('exit').duration(EXIT_ANIMATION_DURATION).style('opacity', 0).remove()
+          exit
+            .transition()
+            .duration(EXIT_ANIMATION_DURATION)
+            .style('opacity', 0)
+            .on('end', function () {
+              this.remove();
+            })
       )
       .style('cursor', 'pointer')
       .on('click', (_, d) => {
         updateGraph(d.gate);
       })
-      .transition('enter/update')
+      .transition()
       .duration(ANIMATION_DURATION)
       .attr('x', (d) => d.x0!)
       .attr('y', (d) => d.y0!)
@@ -92,7 +98,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .attr('height', (d) => d.y1! - d.y0!)
       .style('opacity', 1);
 
-    const paths = links
+    links
       .selectAll<SVGPathElement, SankeyGateLink>('path')
       .data(
         sankeyLayout.links,
@@ -103,20 +109,28 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
         (enter) =>
           enter
             .append('path')
-            .attr('stroke-opacity', 0)
-            .attr('stroke-width', ({ width: w }) => Math.max(1, w!)),
+            .attr('stroke-width', ({ width: w }) => Math.max(1, w!))
+            .style('stroke-opacity', 0),
         (update) => update,
         (exit) =>
           exit
-            .transition('exit')
+            .transition()
             .duration(EXIT_ANIMATION_DURATION)
-            .attr('stroke-opacity', 0)
-            .remove()
+            .style('stroke-opacity', 0)
+            .on('end', function () {
+              this.remove();
+            })
       )
       .style('fill', 'none')
       .style('stroke', '#000')
+      .transition()
+      .duration(ANIMATION_DURATION)
+      .attr('d', sankeyLinkHorizontal())
+      .attr('stroke-width', ({ width: w }) => Math.max(1, w!))
+      .style('stroke-opacity', 0.2)
+      .selection()
       .on('mouseenter', function (evt: MouseEvent, d) {
-        select(this).attr('stroke-opacity', 0.4);
+        select(this).interrupt('hover').style('stroke-opacity', 0.4);
         tooltip
           .classed('active', true)
           .text(d.value === 1 ? `${d.value} NAND gate` : `${d.value} NAND gates`)
@@ -130,15 +144,9 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
         select(this)
           .transition('hover')
           .duration(EXIT_ANIMATION_DURATION)
-          .attr('stroke-opacity', 0.2);
+          .style('stroke-opacity', 0.2);
         tooltip.classed('active', false);
       });
-    paths
-      .transition('enter/update')
-      .duration(ANIMATION_DURATION)
-      .attr('d', sankeyLinkHorizontal())
-      .attr('stroke-width', ({ width: w }) => Math.max(1, w!))
-      .attr('stroke-opacity', 0.2);
 
     text
       .selectAll<SVGTextElement, SankeyGateNode>('text')
@@ -152,9 +160,15 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
             .style('opacity', 0),
         (update) => update,
         (exit) =>
-          exit.transition('exit').duration(EXIT_ANIMATION_DURATION).style('opacity', 0).remove()
+          exit
+            .transition()
+            .duration(EXIT_ANIMATION_DURATION)
+            .style('opacity', 0)
+            .on('end', function () {
+              this.remove();
+            })
       )
-      .transition('enter/update')
+      .transition()
       .duration(ANIMATION_DURATION)
       .attr('x', (d) => (d.x0! < width / 2 ? d.x1! + TEXT_PADDING : d.x0! - TEXT_PADDING))
       .attr('y', (d) => (d.y1! + d.y0!) / 2)
