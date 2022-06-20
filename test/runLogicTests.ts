@@ -5,13 +5,9 @@ import type { Bool, WithGateCounts } from '../src/main';
 const toBinaryString = (num: number, length: number): string =>
   (new Array(length).fill('0').join('') + num.toString(2)).slice(-length);
 
-interface GateFunction<T extends Bool[]> extends WithGateCounts {
-  (...args: T): Bool;
-}
-
 function runLogicTests<T extends Bool[]>(
   logicGateName: string,
-  gateFunction: GateFunction<T>,
+  gateFunction: WithGateCounts<T>,
   truthTable: [T, Bool][]
 ) {
   if (truthTable.length === 0) {

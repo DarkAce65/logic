@@ -17,7 +17,10 @@ import { debounce } from './utils/debounce';
 import './main.scss';
 
 export type Bool = 0 | 1;
-export interface WithGateCounts {
+interface GateFunction<T extends Bool[]> {
+  (...args: T): Bool;
+}
+export interface WithGateCounts<T extends Bool[] = Bool[]> extends GateFunction<T> {
   gateCounts: { [gate: string]: number };
 }
 
