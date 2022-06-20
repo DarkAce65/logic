@@ -1,5 +1,7 @@
 body {
   margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
 }
 
 #container {
@@ -12,6 +14,21 @@ body {
 #sankeyContainer {
   flex: 1;
   overflow: hidden;
+
+  #tooltip {
+    display: none;
+    position: absolute;
+    pointer-events: none;
+    background: black;
+    color: white;
+    max-width: 200px;
+    padding: 5px 10px;
+    text-align: center;
+
+    &.active {
+      display: block;
+    }
+  }
 }
 
 #controls {

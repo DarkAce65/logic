@@ -1,6 +1,6 @@
 import { sankeyLinkHorizontal } from 'd3-sankey';
 import 'd3-transition';
-import { create as d3Create } from 'd3-selection';
+import { create as d3Create, select } from 'd3-selection';
 
 import { and } from './basic/and';
 import { nand } from './basic/nand';
@@ -34,11 +34,17 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
   let width = element.clientWidth;
   let height = element.clientHeight;
 
-  const svg = d3Create('svg').style('font', '10px sans-serif');
+  const svg = d3Create('svg')
+    .style('font-size', '16px')
+    .style(
+      'font-family',
+      '-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"'
+    );
 
-  const nodes = svg.append('g');
-  const links = svg.append('g');
   const text = svg.append('g').attr('font-size', 16);
+  const links = svg.append('g').style('mix-blend-mode', 'multiply');
+  const nodes = svg.append('g');
+  const tooltip = select(element).append('div').attr('id', 'tooltip');
 
   element.appendChild(svg.node()!);
 
@@ -62,21 +68,23 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
             .append('rect')
             .attr('x', (d) => d.x0!)
             .attr('y', (d) => d.y0!)
-            .attr('height', (d) => d.y1! - d.y0!)
             .attr('width', (d) => d.x1! - d.x0!)
+            .attr('height', (d) => d.y1! - d.y0!)
             .style('opacity', 0),
         (update) => update,
-        (exit) => exit.transition().duration(EXIT_ANIMATION_DURATION).style('opacity', 0).remove()
+        (exit) =>
+          exit.transition('exit').duration(EXIT_ANIMATION_DURATION).style('opacity', 0).remove()
       )
+      .style('cursor', 'pointer')
       .on('click', (_, d) => {
         updateGraph(d.gate);
       })
-      .transition()
+      .transition('enter/update')
       .duration(ANIMATION_DURATION)
       .attr('x', (d) => d.x0!)
       .attr('y', (d) => d.y0!)
-      .attr('height', (d) => d.y1! - d.y0!)
       .attr('width', (d) => d.x1! - d.x0!)
+      .attr('height', (d) => d.y1! - d.y0!)
       .style('opacity', 1);
 
     const paths = links
@@ -87,21 +95,38 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
           `${(source as SankeyGateNode).gate}-${(target as SankeyGateNode).gate}`
       )
       .join(
-        (enter) => {
-          const p = enter.append('path');
-          p.append('title').text((d) => d.value);
-          return p
+        (enter) =>
+          enter
+            .append('path')
             .attr('stroke-opacity', 0)
-            .attr('stroke-width', ({ width: w }) => Math.max(1, w!));
-        },
+            .attr('stroke-width', ({ width: w }) => Math.max(1, w!)),
         (update) => update,
         (exit) =>
-          exit.transition().duration(EXIT_ANIMATION_DURATION).attr('stroke-opacity', 0).remove()
+          exit
+            .transition('exit')
+            .duration(EXIT_ANIMATION_DURATION)
+            .attr('stroke-opacity', 0)
+            .remove()
       )
       .style('fill', 'none')
-      .style('stroke', '#000');
+      .style('stroke', '#000')
+      .on('mouseenter', function (_, d) {
+        select(this).attr('stroke-opacity', 0.4);
+        tooltip.classed('active', true);
+        tooltip.text(`${d.value} NAND gates`);
+      })
+      .on('mousemove', function (evt: MouseEvent) {
+        tooltip.style('top', `${evt.clientY}px`).style('left', `${evt.clientX + 15}px`);
+      })
+      .on('mouseleave', function () {
+        select(this)
+          .transition('hover')
+          .duration(EXIT_ANIMATION_DURATION)
+          .attr('stroke-opacity', 0.2);
+        tooltip.classed('active', false);
+      });
     paths
-      .transition()
+      .transition('enter/update')
       .duration(ANIMATION_DURATION)
       .attr('d', sankeyLinkHorizontal())
       .attr('stroke-width', ({ width: w }) => Math.max(1, w!))
@@ -118,9 +143,10 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
             .attr('y', (d) => (d.y1! + d.y0!) / 2)
             .style('opacity', 0),
         (update) => update,
-        (exit) => exit.transition().duration(EXIT_ANIMATION_DURATION).style('opacity', 0).remove()
+        (exit) =>
+          exit.transition('exit').duration(EXIT_ANIMATION_DURATION).style('opacity', 0).remove()
       )
-      .transition()
+      .transition('enter/update')
       .duration(ANIMATION_DURATION)
       .attr('x', (d) => (d.x0! < width / 2 ? d.x1! + TEXT_PADDING : d.x0! - TEXT_PADDING))
       .attr('y', (d) => (d.y1! + d.y0!) / 2)
