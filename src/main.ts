@@ -49,6 +49,8 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
   element.appendChild(svg.node()!);
 
   return (gate: string) => {
+    tooltip.classed('active', false);
+
     width = element.clientWidth;
     height = element.clientHeight;
 
@@ -110,12 +112,15 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       )
       .style('fill', 'none')
       .style('stroke', '#000')
-      .on('mouseenter', function (_, d) {
+      .on('mouseenter', function (evt: MouseEvent, d) {
         select(this).attr('stroke-opacity', 0.4);
-        tooltip.classed('active', true);
-        tooltip.text(d.value === 1 ? `${d.value} NAND gate` : `${d.value} NAND gates`);
+        tooltip
+          .classed('active', true)
+          .text(d.value === 1 ? `${d.value} NAND gate` : `${d.value} NAND gates`)
+          .style('top', `${evt.clientY}px`)
+          .style('left', `${evt.clientX + 15}px`);
       })
-      .on('mousemove', function (evt: MouseEvent) {
+      .on('mousemove', (evt: MouseEvent) => {
         tooltip.style('top', `${evt.clientY}px`).style('left', `${evt.clientX + 15}px`);
       })
       .on('mouseleave', function () {
