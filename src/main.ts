@@ -38,8 +38,15 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
 
   element.appendChild(svg.node()!);
 
+  let readyTimeout: ReturnType<typeof setTimeout>;
   return (gate: string) => {
     tooltip.classed('active', false);
+
+    clearTimeout(readyTimeout);
+    svg.classed('ready', false);
+    readyTimeout = setTimeout(() => {
+      svg.classed('ready', true);
+    }, ANIMATION_DURATION);
 
     width = element.clientWidth;
     height = element.clientHeight;
@@ -47,17 +54,16 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
     const sankeyLayout = sankeyLayouts[gate](width, height);
     const maxDepth = sankeyLayout.nodes[0].height || 1;
 
+    const totalNANDGates = sankeyLayout.nodes[0].totalNANDGates;
+    document.querySelector('#gateStats')!.textContent =
+      totalNANDGates < 2
+        ? `${totalNANDGates} total NAND gate`
+        : `${totalNANDGates} total NAND gates`;
+
     svg
       .attr('viewBox', [0, 0, width, height])
       .style('width', `${width}px`)
-      .style('height', `${height}px`)
-      .interrupt('load')
-      .classed('ready', false)
-      .transition('load')
-      .delay(ANIMATION_DURATION)
-      .on('end', function () {
-        select(this).classed('ready', true);
-      });
+      .style('height', `${height}px`);
 
     nodes
       .selectAll<SVGRectElement, SankeyGateNode>('rect')
@@ -186,7 +192,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .on('mouseenter', function (evt: MouseEvent, d) {
         tooltip
           .classed('active', true)
-          .text(d.value === 1 ? `${d.value} NAND gate` : `${d.value} NAND gates`)
+          .text(d.value < 2 ? `${d.value} NAND gate` : `${d.value} NAND gates`)
           .style('top', `${evt.clientY}px`)
           .style('left', `${evt.clientX + 15}px`);
       })
@@ -250,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
       gateSelector.appendChild(optionGroup);
     }
   }
-  document.querySelector('#controls')!.appendChild(gateSelector);
+  document.querySelector('#gateSelector')!.appendChild(gateSelector);
 
   updateGraph = (gate: string): void => {
     if (!Object.prototype.hasOwnProperty.call(sankeyLayouts, gate) || gateSelector.value === gate) {
