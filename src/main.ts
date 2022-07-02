@@ -105,18 +105,20 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
                   (d) =>
                     `link-${(d.source as SankeyGateNode).gate}-${(d.target as SankeyGateNode).gate}`
                 )
-                .attr('gradientUnits', 'userSpaceOnUse'),
+                .attr('gradientUnits', 'userSpaceOnUse')
+                .attr('x1', (d) => (d.source as SankeyGateNode).x1!)
+                .attr('x2', (d) => (d.target as SankeyGateNode).x0!),
             (update) => update,
             (exit) =>
               exit
                 .transition()
-                .delay(3000)
+                .delay(EXIT_ANIMATION_DURATION)
                 .on('end', function () {
                   this.remove();
                 })
           )
           .transition()
-          .duration(EXIT_ANIMATION_DURATION)
+          .duration(ANIMATION_DURATION)
           .attr('x1', (d) => (d.source as SankeyGateNode).x1!)
           .attr('x2', (d) => (d.target as SankeyGateNode).x0!)
           .selection()
