@@ -1,4 +1,6 @@
 import { and } from './gates/basic/and';
+import { dmux } from './gates/basic/dmux';
+import { mux } from './gates/basic/mux';
 import { not } from './gates/basic/not';
 import { or } from './gates/basic/or';
 import { xor } from './gates/basic/xor';
@@ -15,7 +17,10 @@ export interface WithGateCounts<I extends Bool[] = Bool[], O extends Bool | Bool
 
 export const ALL_GATES: {
   [gateOrCategory: string]: WithGateCounts | { [gate: string]: WithGateCounts };
-} = { nand, basic: { and, not, or, xor } };
+} = {
+  nand,
+  basic: { and, dmux, mux, not, or, xor },
+};
 
 export const FLATTENED_GATES = Object.keys(ALL_GATES).reduce<{ [gate: string]: WithGateCounts }>(
   (flattenedGates, gateOrCategory) => {
