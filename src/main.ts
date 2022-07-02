@@ -50,7 +50,14 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
     svg
       .attr('viewBox', [0, 0, width, height])
       .style('width', `${width}px`)
-      .style('height', `${height}px`);
+      .style('height', `${height}px`)
+      .interrupt('load')
+      .classed('ready', false)
+      .transition('load')
+      .delay(ANIMATION_DURATION)
+      .on('end', function () {
+        select(this).classed('ready', true);
+      });
 
     nodes
       .selectAll<SVGRectElement, SankeyGateNode>('rect')
@@ -148,6 +155,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
         (enter) =>
           enter
             .append('path')
+            .classed('link', true)
             .style('stroke', (d) =>
               interpolateSpectral((d.source as SankeyGateNode).depth! / maxDepth)
             )

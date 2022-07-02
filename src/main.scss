@@ -30,6 +30,18 @@ body {
       display: block;
     }
   }
+
+  svg.ready {
+    path.link {
+      pointer-events: stroke;
+      transition: stroke-opacity 300ms;
+
+      &:hover {
+        stroke-opacity: 0.6 !important;
+        transition: stroke-opacity 0s;
+      }
+    }
+  }
 }
 
 #controls {
