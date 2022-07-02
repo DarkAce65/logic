@@ -37,10 +37,11 @@ module.exports = {
       'warn',
       {
         'newlines-between': 'always',
-        groups: ['builtin', 'external', ['internal', 'parent'], 'sibling', 'index'],
+        groups: ['builtin', 'external', 'internal', 'type', ['parent', 'sibling'], 'index'],
         pathGroups: [
           { pattern: 'vite', group: 'external', position: 'before' },
           { pattern: 'vitest', group: 'external', position: 'before' },
+          { pattern: '@/**', group: 'internal' },
         ],
         pathGroupsExcludedImportTypes: ['builtin'],
         alphabetize: { order: 'asc', caseInsensitive: false },
