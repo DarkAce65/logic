@@ -1,6 +1,6 @@
-import runLogicTests from '../runLogicTests';
+import { and } from '@/gates/basic/and';
 
-import { and } from '@/basic/and';
+import runLogicTests from '../../runLogicTests';
 
 runLogicTests('AND', and, [
   [[0, 0], 0],

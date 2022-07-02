@@ -1,7 +1,7 @@
-import type { Bool } from '../gates';
+import type { Bool } from '@/gates';
 
+import { nand } from '../nand';
 import { and } from './and';
-import { nand } from './nand';
 import { or } from './or';
 
 export function xor(a: Bool, b: Bool): Bool {

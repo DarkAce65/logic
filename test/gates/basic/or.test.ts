@@ -1,6 +1,6 @@
-import runLogicTests from '../runLogicTests';
+import { or } from '@/gates/basic/or';
 
-import { or } from '@/basic/or';
+import runLogicTests from '../../runLogicTests';
 
 runLogicTests('OR', or, [
   [[0, 0], 0],

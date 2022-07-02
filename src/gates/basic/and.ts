@@ -1,6 +1,6 @@
-import type { Bool } from '../gates';
+import type { Bool } from '@/gates';
 
-import { nand } from './nand';
+import { nand } from '../nand';
 import { not } from './not';
 
 export function and(a: Bool, b: Bool): Bool {

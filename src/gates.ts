@@ -1,8 +1,8 @@
-import { and } from './basic/and';
-import { nand } from './basic/nand';
-import { not } from './basic/not';
-import { or } from './basic/or';
-import { xor } from './basic/xor';
+import { and } from './gates/basic/and';
+import { not } from './gates/basic/not';
+import { or } from './gates/basic/or';
+import { xor } from './gates/basic/xor';
+import { nand } from './gates/nand';
 
 export type Bool = 0 | 1;
 interface GateFunction<T extends Bool[]> {
