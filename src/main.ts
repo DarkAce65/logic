@@ -1,5 +1,6 @@
 import { sankeyLinkHorizontal } from 'd3-sankey';
 import 'd3-transition';
+import { interpolateSpectral } from 'd3-scale-chromatic';
 import { create as d3Create, select } from 'd3-selection';
 
 import {
@@ -44,6 +45,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
     height = element.clientHeight;
 
     const sankeyLayout = sankeyLayouts[gate](width, height);
+    const maxDepth = sankeyLayout.nodes[0].height || 1;
 
     svg
       .attr('viewBox', [0, 0, width, height])
@@ -61,6 +63,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
             .attr('y', (d) => d.y0!)
             .attr('width', (d) => d.x1! - d.x0!)
             .attr('height', (d) => d.y1! - d.y0!)
+            .style('fill', (d) => interpolateSpectral(d.depth! / maxDepth))
             .style('opacity', 0),
         (update) => update,
         (exit) =>
@@ -82,20 +85,71 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .attr('y', (d) => d.y0!)
       .attr('width', (d) => d.x1! - d.x0!)
       .attr('height', (d) => d.y1! - d.y0!)
+      .style('fill', (d) => interpolateSpectral(d.depth! / maxDepth))
       .style('opacity', 1);
 
     links
+      .call((l) =>
+        l
+          .selectAll<SVGLinearGradientElement, SankeyGateLink>('linearGradient')
+          .data(
+            sankeyLayout.links,
+            (d) => `${(d.source as SankeyGateNode).gate}-${(d.target as SankeyGateNode).gate}`
+          )
+          .join(
+            (enter) =>
+              enter
+                .append('linearGradient')
+                .attr(
+                  'id',
+                  (d) =>
+                    `link-${(d.source as SankeyGateNode).gate}-${(d.target as SankeyGateNode).gate}`
+                )
+                .attr('gradientUnits', 'userSpaceOnUse'),
+            (update) => update,
+            (exit) =>
+              exit
+                .transition()
+                .delay(3000)
+                .on('end', function () {
+                  this.remove();
+                })
+          )
+          .transition()
+          .duration(EXIT_ANIMATION_DURATION)
+          .attr('x1', (d) => (d.source as SankeyGateNode).x1!)
+          .attr('x2', (d) => (d.target as SankeyGateNode).x0!)
+          .selection()
+          .each(function (d) {
+            select(this)
+              .selectAll<SVGStopElement, { offset: string; value: number }>('stop')
+              .data(
+                [
+                  { offset: '0%', value: (d.source as SankeyGateNode).depth! / maxDepth },
+                  { offset: '100%', value: (d.target as SankeyGateNode).depth! / maxDepth },
+                ],
+                ({ offset }) => offset
+              )
+              .join('stop')
+              .attr('offset', ({ offset }) => offset)
+              .transition()
+              .duration(ANIMATION_DURATION)
+              .attr('stop-color', ({ value }) => interpolateSpectral(value));
+          })
+      )
       .selectAll<SVGPathElement, SankeyGateLink>('path')
       .data(
         sankeyLayout.links,
-        ({ source, target }) =>
-          `${(source as SankeyGateNode).gate}-${(target as SankeyGateNode).gate}`
+        (d) => `${(d.source as SankeyGateNode).gate}-${(d.target as SankeyGateNode).gate}`
       )
       .join(
         (enter) =>
           enter
             .append('path')
-            .attr('stroke-width', ({ width: w }) => Math.max(1, w!))
+            .style('stroke', (d) =>
+              interpolateSpectral((d.source as SankeyGateNode).depth! / maxDepth)
+            )
+            .attr('stroke-width', (d) => Math.max(1, d.width!))
             .style('stroke-opacity', 0),
         (update) => update,
         (exit) =>
@@ -108,15 +162,18 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
             })
       )
       .style('fill', 'none')
-      .style('stroke', '#000')
+      .style(
+        'stroke',
+        (d) =>
+          `url(#link-${(d.source as SankeyGateNode).gate}-${(d.target as SankeyGateNode).gate})`
+      )
       .transition()
       .duration(ANIMATION_DURATION)
       .attr('d', sankeyLinkHorizontal())
-      .attr('stroke-width', ({ width: w }) => Math.max(1, w!))
-      .style('stroke-opacity', 0.2)
+      .attr('stroke-width', (d) => Math.max(1, d.width!))
+      .style('stroke-opacity', 0.3)
       .selection()
       .on('mouseenter', function (evt: MouseEvent, d) {
-        select(this).interrupt('hover').style('stroke-opacity', 0.4);
         tooltip
           .classed('active', true)
           .text(d.value === 1 ? `${d.value} NAND gate` : `${d.value} NAND gates`)
@@ -127,10 +184,6 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
         tooltip.style('top', `${evt.clientY}px`).style('left', `${evt.clientX + 15}px`);
       })
       .on('mouseleave', function () {
-        select(this)
-          .transition('hover')
-          .duration(EXIT_ANIMATION_DURATION)
-          .style('stroke-opacity', 0.2);
         tooltip.classed('active', false);
       });
 
@@ -143,6 +196,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
             .append('text')
             .attr('x', (d) => (d.x0! < width / 2 ? d.x1! + TEXT_PADDING : d.x0! - TEXT_PADDING))
             .attr('y', (d) => (d.y1! + d.y0!) / 2)
+            .attr('dy', '0.35em')
             .style('opacity', 0),
         (update) => update,
         (exit) =>
@@ -154,12 +208,11 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
               this.remove();
             })
       )
+      .attr('text-anchor', (d) => (d.x0! < width / 2 ? 'start' : 'end'))
       .transition()
       .duration(ANIMATION_DURATION)
       .attr('x', (d) => (d.x0! < width / 2 ? d.x1! + TEXT_PADDING : d.x0! - TEXT_PADDING))
       .attr('y', (d) => (d.y1! + d.y0!) / 2)
-      .attr('dy', '0.35em')
-      .attr('text-anchor', (d) => (d.x0! < width / 2 ? 'start' : 'end'))
       .style('opacity', 1)
       .text((d) => `${d.displayText || d.gate.toUpperCase()} ${d.totalNANDGates}`);
   };

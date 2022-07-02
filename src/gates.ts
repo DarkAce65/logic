@@ -15,6 +15,7 @@ export interface WithGateCounts<T extends Bool[] = Bool[]> extends GateFunction<
 export const ALL_GATES: {
   [gateOrCategory: string]: WithGateCounts | { [gate: string]: WithGateCounts };
 } = { nand, basic: { and, not, or, xor } };
+
 export const FLATTENED_GATES = Object.keys(ALL_GATES).reduce<{ [gate: string]: WithGateCounts }>(
   (flattenedGates, gateOrCategory) => {
     const gateData = ALL_GATES[gateOrCategory];
