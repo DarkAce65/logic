@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 
-import type { Bool, WithGateCounts } from '@/gates';
+import type { Bool, WithGateCounts } from '@/types';
 
 const toBinaryString = (num: number, length: number): string =>
   (new Array(length).fill('0').join('') + num.toString(2)).slice(-length);

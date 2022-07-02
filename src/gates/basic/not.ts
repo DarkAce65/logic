@@ -1,4 +1,4 @@
-import type { Bool } from '@/gates';
+import type { Bool } from '@/types';
 
 import { nand } from '../nand';
 

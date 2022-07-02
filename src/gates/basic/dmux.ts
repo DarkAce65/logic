@@ -1,4 +1,4 @@
-import { Bool } from '@/gates';
+import type { Bool } from '@/types';
 
 import { and } from './and';
 import { not } from './not';

@@ -1,6 +1,6 @@
 import { SankeyGraph, SankeyLink, SankeyNode, sankey } from 'd3-sankey';
 
-import { WithGateCounts } from './gates';
+import type { WithGateCountsIgnoringArgs } from './gates';
 
 const SANKEY_PADDING = 20;
 
@@ -11,7 +11,7 @@ interface GateGraphData {
 }
 
 const buildAllGateGraphData = (gatesWithCounts: {
-  [gate: string]: WithGateCounts;
+  [gate: string]: WithGateCountsIgnoringArgs;
 }): { [gate: string]: GateGraphData } => {
   const allGateGraphData: { [gate: string]: GateGraphData } = {};
 
@@ -54,7 +54,7 @@ interface SankeyLayoutGenerators {
 export type SankeyGateNode = SankeyNode<GateNode, GateLink>;
 export type SankeyGateLink = SankeyLink<GateNode, GateLink>;
 export const buildSankeyLayoutGenerators = (gatesWithCounts: {
-  [gate: string]: WithGateCounts;
+  [gate: string]: WithGateCountsIgnoringArgs;
 }): SankeyLayoutGenerators => {
   const allGateGraphData = buildAllGateGraphData(gatesWithCounts);
   const sankeyLayouts: SankeyLayoutGenerators = {};
