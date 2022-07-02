@@ -30,7 +30,7 @@ function runLogicTests<T extends Bool[]>(
       }
     }
 
-    expect(missingCases).toHaveLength(0);
+    expect(missingCases, 'missing truth table cases').toHaveLength(0);
   });
 
   for (const [inputs, expected] of truthTable.sort(([a], [b]) =>
