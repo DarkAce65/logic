@@ -5,10 +5,10 @@ import type { Bool, WithGateCounts } from '@/gates';
 const toBinaryString = (num: number, length: number): string =>
   (new Array(length).fill('0').join('') + num.toString(2)).slice(-length);
 
-function runLogicTests<T extends Bool[]>(
+function runLogicTests<I extends Bool[], O extends Bool | Bool[]>(
   logicGateName: string,
-  gateFunction: WithGateCounts<T>,
-  truthTable: [T, Bool][]
+  gateFunction: WithGateCounts<I, O>,
+  truthTable: [I, O][]
 ) {
   if (truthTable.length === 0) {
     throw new Error('Truth table cannot be empty!');
@@ -36,8 +36,10 @@ function runLogicTests<T extends Bool[]>(
   for (const [inputs, expected] of truthTable.sort(([a], [b]) =>
     a.join('').localeCompare(b.join(''))
   )) {
-    test(`${logicGateName}(${inputs.join(', ')}) === ${expected}`, () => {
-      expect(gateFunction(...inputs)).toBe(expected);
+    const inputsString = inputs.join(', ');
+    const expectedString = Array.isArray(expected) ? `[${expected.join(', ')}]` : expected;
+    test(`${logicGateName}(${inputsString}) === ${expectedString}`, () => {
+      expect(gateFunction(...inputs)).toStrictEqual(expected);
     });
   }
 }

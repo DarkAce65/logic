@@ -5,10 +5,11 @@ import { xor } from './gates/basic/xor';
 import { nand } from './gates/nand';
 
 export type Bool = 0 | 1;
-interface GateFunction<T extends Bool[]> {
-  (...args: T): Bool;
+interface GateFunction<I extends Bool[], O extends Bool | Bool[]> {
+  (...args: I): O;
 }
-export interface WithGateCounts<T extends Bool[] = Bool[]> extends GateFunction<T> {
+export interface WithGateCounts<I extends Bool[] = Bool[], O extends Bool | Bool[] = Bool | Bool[]>
+  extends GateFunction<I, O> {
   gateCounts: { [gate: string]: number };
 }
 
