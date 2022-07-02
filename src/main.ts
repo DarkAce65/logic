@@ -14,8 +14,8 @@ import { debounce } from './utils/debounce';
 import './main.scss';
 
 const TEXT_PADDING = 10;
-const ANIMATION_DURATION = 500;
-const EXIT_ANIMATION_DURATION = 200;
+const ANIMATION_DURATION = 750;
+const EXIT_ANIMATION_DURATION = 300;
 
 const sankeyLayouts = buildSankeyLayoutGenerators(FLATTENED_GATES);
 
