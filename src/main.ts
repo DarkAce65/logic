@@ -56,7 +56,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
 
     const totalNANDGates = sankeyLayout.nodes[0].totalNANDGates;
     document.querySelector('#gateStats')!.textContent =
-      totalNANDGates < 2
+      totalNANDGates === 1
         ? `${totalNANDGates} total NAND gate`
         : `${totalNANDGates} total NAND gates`;
 
@@ -192,7 +192,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .on('mouseenter', function (evt: MouseEvent, d) {
         tooltip
           .classed('active', true)
-          .text(d.value < 2 ? `${d.value} NAND gate` : `${d.value} NAND gates`)
+          .text(d.value === 1 ? `${d.value} NAND gate` : `${d.value} NAND gates`)
           .style('top', `${evt.clientY}px`)
           .style('left', `${evt.clientX + 15}px`);
       })
