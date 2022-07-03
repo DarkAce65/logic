@@ -17,7 +17,7 @@ const TEXT_PADDING = 10;
 const ANIMATION_DURATION = 750;
 const EXIT_ANIMATION_DURATION = 300;
 
-const sankeyLayouts = buildSankeyLayoutGenerators(FLATTENED_GATES);
+const [sankeyLayouts, allGateGraphData] = buildSankeyLayoutGenerators(FLATTENED_GATES);
 
 let updateGraph: (gate: string) => void;
 const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void) => {
@@ -247,7 +247,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       const optionGroup = document.createElement('optgroup');
       optionGroup.label = categoryOrGate;
-      for (const gate of Object.keys(ALL_GATES[categoryOrGate])) {
+      for (const gate of Object.keys(ALL_GATES[categoryOrGate]).sort(
+        (a, b) => allGateGraphData[a].totalNANDGates - allGateGraphData[b].totalNANDGates
+      )) {
         const option = document.createElement('option');
         option.value = gate;
         option.text = gate.toUpperCase();

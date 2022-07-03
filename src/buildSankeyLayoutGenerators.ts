@@ -55,7 +55,7 @@ export type SankeyGateNode = SankeyNode<GateNode, GateLink>;
 export type SankeyGateLink = SankeyLink<GateNode, GateLink>;
 export const buildSankeyLayoutGenerators = (gatesWithCounts: {
   [gate: string]: WithGateCountsIgnoringArgs;
-}): SankeyLayoutGenerators => {
+}): [SankeyLayoutGenerators, { [gate: string]: GateGraphData }] => {
   const allGateGraphData = buildAllGateGraphData(gatesWithCounts);
   const sankeyLayouts: SankeyLayoutGenerators = {};
 
@@ -103,5 +103,5 @@ export const buildSankeyLayoutGenerators = (gatesWithCounts: {
         ])({ nodes, links });
   }
 
-  return sankeyLayouts;
+  return [sankeyLayouts, allGateGraphData];
 };
