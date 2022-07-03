@@ -1,8 +1,11 @@
 import { and } from '@/gates/basic/and';
 
-import runLogicTests from '../../runLogicTests';
+import { runExhaustiveLogicTests } from '../../runLogicTests';
 
-runLogicTests('AND', and, [
+runExhaustiveLogicTests(
+  'AND',
+  and
+)([
   [[0, 0], 0],
   [[0, 1], 0],
   [[1, 0], 0],

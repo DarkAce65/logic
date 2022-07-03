@@ -1,8 +1,11 @@
 import { not } from '@/gates/basic/not';
 
-import runLogicTests from '../../runLogicTests';
+import { runExhaustiveLogicTests } from '../../runLogicTests';
 
-runLogicTests('NOT', not, [
+runExhaustiveLogicTests(
+  'NOT',
+  not
+)([
   [[0], 1],
   [[1], 0],
 ]);

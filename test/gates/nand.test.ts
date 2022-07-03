@@ -1,8 +1,11 @@
 import { nand } from '@/gates/nand';
 
-import runLogicTests from '../runLogicTests';
+import { runExhaustiveLogicTests } from '../runLogicTests';
 
-runLogicTests('NAND', nand, [
+runExhaustiveLogicTests(
+  'NAND',
+  nand
+)([
   [[0, 0], 1],
   [[0, 1], 1],
   [[1, 0], 1],

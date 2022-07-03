@@ -1,8 +1,11 @@
 import { or } from '@/gates/basic/or';
 
-import runLogicTests from '../../runLogicTests';
+import { runExhaustiveLogicTests } from '../../runLogicTests';
 
-runLogicTests('OR', or, [
+runExhaustiveLogicTests(
+  'OR',
+  or
+)([
   [[0, 0], 0],
   [[0, 1], 1],
   [[1, 0], 1],

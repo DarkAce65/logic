@@ -1,8 +1,11 @@
 import { dmux } from '@/gates/basic/dmux';
 
-import runLogicTests from '../../runLogicTests';
+import { runExhaustiveLogicTests } from '../../runLogicTests';
 
-runLogicTests('DMUX', dmux, [
+runExhaustiveLogicTests(
+  'DMUX',
+  dmux
+)([
   [
     [0, 0],
     [0, 0],
