@@ -36,9 +36,8 @@ export function runExhaustiveLogicTests<I extends Bool[], O extends Bool | Tuple
       expect(missingCases, 'missing truth table cases').toHaveLength(0);
     });
 
-    for (const [inputs, expected] of truthTable.sort(([a], [b]) =>
-      a.join('').localeCompare(b.join(''))
-    )) {
+    const sortedTruthTable = truthTable.sort(([a], [b]) => a.join('').localeCompare(b.join('')));
+    for (const [inputs, expected] of sortedTruthTable) {
       const inputsString = inputs.join(', ');
       const expectedString = Array.isArray(expected) ? `[${expected.join(', ')}]` : expected;
       test(`${logicGateName}(${inputsString}) === ${expectedString}`, () => {
@@ -57,9 +56,8 @@ export function runSingleOutputMultibitLogicTests<
       throw new Error('Test cases cannot be empty!');
     }
 
-    for (const [inputs, expected] of testCases.sort(([a], [b]) =>
-      a.join('').localeCompare(b.join(''))
-    )) {
+    const sortedTestCases = testCases.sort(([a], [b]) => a.join('').localeCompare(b.join('')));
+    for (const [inputs, expected] of sortedTestCases) {
       const inputsString = inputs
         .map((input) =>
           Array.isArray(input) ? `${fromBinaryString(input.join(''))}_${input.length}` : input
@@ -84,12 +82,16 @@ export function runMultiOutputMultibitLogicTests<
       throw new Error('Test cases cannot be empty!');
     }
 
-    for (const [inputs, expected] of testCases.sort(([a], [b]) =>
-      a.join('').localeCompare(b.join(''))
-    )) {
-      const inputsString = inputs
-        .map((input) => (Array.isArray(input) ? fromBinaryString(input.join('')) : input))
-        .join(', ');
+    const sortedTestCases = testCases
+      .map<[string, I, O]>(([i, e]) => [
+        i
+          .map((input) => (Array.isArray(input) ? fromBinaryString(input.join('')) : input))
+          .join(', '),
+        i,
+        e,
+      ])
+      .sort(([a], [b]) => a.localeCompare(b));
+    for (const [inputsString, inputs, expected] of sortedTestCases) {
       const expectedString = `[${expected
         .map((output) =>
           Array.isArray(output) ? `${fromBinaryString(output.join(''))}_${output.length}` : output
