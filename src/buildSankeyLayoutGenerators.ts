@@ -6,6 +6,7 @@ const SANKEY_PADDING = 20;
 
 interface GateGraphData {
   gate: string;
+  count: number;
   totalNANDGates: number;
   childGateGraphs?: GateGraphData[];
 }
@@ -17,9 +18,9 @@ const buildAllGateGraphData = (gatesWithCounts: {
 
   const buildGateGraphData = (gate: string, gateCount = 1): GateGraphData => {
     if (!Object.prototype.hasOwnProperty.call(gatesWithCounts, gate)) {
-      return { gate, totalNANDGates: 0 };
+      return { gate, count: gateCount, totalNANDGates: 0 };
     } else if (gate === 'nand') {
-      return { gate, totalNANDGates: gateCount };
+      return { gate, count: gateCount, totalNANDGates: gateCount };
     }
 
     let totalNANDGates = 0;
@@ -31,7 +32,7 @@ const buildAllGateGraphData = (gatesWithCounts: {
       childGateGraphs.push(childGateGraphData);
     }
 
-    return { gate, totalNANDGates, childGateGraphs };
+    return { gate, count: gateCount, totalNANDGates, childGateGraphs };
   };
 
   for (const gate of Object.keys(gatesWithCounts)) {
@@ -46,7 +47,9 @@ interface GateNode {
   displayText?: string;
   totalNANDGates: number;
 }
-interface GateLink {}
+interface GateLink {
+  totalNumGates: number;
+}
 interface SankeyLayoutGenerators {
   [gate: string]: (width: number, height: number) => SankeyGraph<GateNode, GateLink>;
 }
@@ -66,7 +69,7 @@ export const buildSankeyLayoutGenerators = (gatesWithCounts: {
     if (gate === 'nand') {
       nodes.push({ gate: 'in', displayText: 'NAND', totalNANDGates: 1 });
       nodes.push({ gate: 'nand', displayText: 'NAND', totalNANDGates: 1 });
-      links.push({ source: 'in', target: 'nand', value: 1 });
+      links.push({ source: 'in', target: 'nand', value: 1, totalNumGates: 1 });
     } else {
       const nodesById: { [gate: string]: SankeyGateNode } = {};
       const linksById: { [sourceTarget: string]: SankeyGateLink } = {};
@@ -81,10 +84,16 @@ export const buildSankeyLayoutGenerators = (gatesWithCounts: {
           for (const childGraph of graph.childGateGraphs) {
             const linkId = `${graph.gate}-${childGraph.gate}`;
             if (!Object.prototype.hasOwnProperty.call(linksById, linkId)) {
-              linksById[linkId] = { source: graph.gate, target: childGraph.gate, value: 0 };
+              linksById[linkId] = {
+                source: graph.gate,
+                target: childGraph.gate,
+                value: 0,
+                totalNumGates: 0,
+              };
               links.push(linksById[linkId]);
             }
             linksById[linkId].value += childGraph.totalNANDGates;
+            linksById[linkId].totalNumGates += childGraph.count;
 
             traverseGraph(childGraph);
           }
@@ -105,3 +114,6 @@ export const buildSankeyLayoutGenerators = (gatesWithCounts: {
 
   return [sankeyLayouts, allGateGraphData];
 };
+
+export const getGateName = (gate: SankeyGateNode): string =>
+  gate.displayText || gate.gate.toUpperCase();

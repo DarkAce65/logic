@@ -25,9 +25,14 @@ body {
     max-width: 200px;
     padding: 5px 10px;
     text-align: center;
+    white-space: pre-wrap;
 
     &.active {
       display: block;
+    }
+
+    small {
+      font-size: 0.7em;
     }
   }
 

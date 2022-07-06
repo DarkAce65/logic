@@ -7,6 +7,7 @@ import {
   SankeyGateLink,
   SankeyGateNode,
   buildSankeyLayoutGenerators,
+  getGateName,
 } from './buildSankeyLayoutGenerators';
 import { ALL_GATES, FLATTENED_GATES } from './gates';
 import { debounce } from './utils/debounce';
@@ -17,9 +18,9 @@ const TEXT_PADDING = 10;
 const ANIMATION_DURATION = 750;
 const EXIT_ANIMATION_DURATION = 300;
 
-const [sankeyLayouts, allGateGraphData] = buildSankeyLayoutGenerators(FLATTENED_GATES);
+const [sankeyLayouts, gateGraphData] = buildSankeyLayoutGenerators(FLATTENED_GATES);
 
-let updateGraph: (gate: string) => void;
+let updateGraph: (gate: string, fromSelect?: boolean) => void;
 const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void) => {
   let width = element.clientWidth;
   let height = element.clientHeight;
@@ -53,12 +54,6 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
 
     const sankeyLayout = sankeyLayouts[gate](width, height);
     const maxDepth = sankeyLayout.nodes[0].height || 1;
-
-    const totalNANDGates = sankeyLayout.nodes[0].totalNANDGates;
-    document.querySelector('#gateStats')!.textContent =
-      totalNANDGates === 1
-        ? `${totalNANDGates} total NAND gate`
-        : `${totalNANDGates} total NAND gates`;
 
     svg
       .attr('viewBox', [0, 0, width, height])
@@ -192,7 +187,22 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .on('mouseenter', function (evt: MouseEvent, d) {
         tooltip
           .classed('active', true)
-          .text(d.value === 1 ? `${d.value} NAND gate` : `${d.value} NAND gates`)
+          .html(() => {
+            const gateName = getGateName(d.target as SankeyGateNode);
+            const nandGateCountText =
+              d.value === 1 ? `${d.value} NAND gate` : `${d.value} NAND gates`;
+
+            if ((d.target as SankeyGateNode).gate === 'nand') {
+              return nandGateCountText;
+            }
+
+            const gateCountText =
+              d.totalNumGates === 1
+                ? `${d.totalNumGates} ${gateName} gate`
+                : `${d.totalNumGates} ${gateName} gates`;
+
+            return `${gateCountText}<br/><small>(${nandGateCountText})</small>`;
+          })
           .style('top', `${evt.clientY}px`)
           .style('left', `${evt.clientX + 15}px`);
       })
@@ -230,7 +240,7 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
       .attr('x', (d) => (d.x0! < width / 2 ? d.x1! + TEXT_PADDING : d.x0! - TEXT_PADDING))
       .attr('y', (d) => (d.y1! + d.y0!) / 2)
       .style('opacity', 1)
-      .text((d) => `${d.displayText || d.gate.toUpperCase()} ${d.totalNANDGates}`);
+      .text((d) => `${getGateName(d)} (${d.totalNANDGates})`);
   };
 };
 
@@ -248,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const optionGroup = document.createElement('optgroup');
       optionGroup.label = categoryOrGate;
       for (const gate of Object.keys(ALL_GATES[categoryOrGate]).sort(
-        (a, b) => allGateGraphData[a].totalNANDGates - allGateGraphData[b].totalNANDGates
+        (a, b) => gateGraphData[a].totalNANDGates - gateGraphData[b].totalNANDGates
       )) {
         const option = document.createElement('option');
         option.value = gate;
@@ -260,19 +270,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.querySelector('#gateSelector')!.appendChild(gateSelector);
 
-  updateGraph = (gate: string): void => {
-    if (!Object.prototype.hasOwnProperty.call(sankeyLayouts, gate) || gateSelector.value === gate) {
+  updateGraph = (gate: string, fromSelect = false): void => {
+    if (!Object.prototype.hasOwnProperty.call(sankeyLayouts, gate)) {
       return;
     }
 
-    gateSelector.value = gate;
+    if (!fromSelect && gateSelector.value === gate) {
+      return;
+    } else {
+      gateSelector.value = gate;
+    }
+
+    const totalNANDGates = gateGraphData[gate].totalNANDGates;
+    document.querySelector('#gateStats')!.textContent =
+      totalNANDGates === 1
+        ? `${totalNANDGates} total NAND gate`
+        : `${totalNANDGates} total NAND gates`;
     render(gate);
   };
 
   gateSelector.value = '';
   updateGraph('nand');
   gateSelector.addEventListener('change', (evt) => {
-    render((evt.target as HTMLInputElement).value);
+    updateGraph((evt.target as HTMLInputElement).value, true);
   });
 
   window.addEventListener(
