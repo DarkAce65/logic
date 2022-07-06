@@ -2,11 +2,19 @@ import { expect, test } from 'vitest';
 
 import type { Bool, Tuple, WithGateCounts } from '@/types';
 
-const fromBinaryString = (binary: string): number => parseInt(binary, 2);
-const toBinaryString = (num: number, length: number): string => {
+export const fromBinaryString = (binary: string): number => parseInt(binary, 2);
+export const toBinaryString = (num: number, length: number): string => {
+  if (num > Math.pow(2, length) - 1) {
+    throw new Error(`${num} is too large to fit in ${length} bits`);
+  }
+
   const binary = num.toString(2);
   return `${new Array(length - binary.length).fill('0').join('')}${binary}`;
 };
+export const toBinaryTuple = <L extends number>(num: number, length: L): Tuple<Bool, L> =>
+  toBinaryString(num, length)
+    .split('')
+    .map((b) => parseInt(b)) as Tuple<Bool, L>;
 
 export function runExhaustiveLogicTests<I extends Bool[], O extends Bool | Tuple<Bool, number>>(
   logicGateName: string,
