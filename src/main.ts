@@ -235,12 +235,15 @@ const renderGateVisualizations = (element: HTMLElement): ((gate: string) => void
             })
       )
       .attr('text-anchor', (d) => (d.x0! < width / 2 ? 'start' : 'end'))
+      .text((d) => {
+        const gateName = getGateName(d);
+        return d.count > 1 ? `${d.count} ${gateName} gates` : `1 ${gateName} gate`;
+      })
       .transition()
       .duration(ANIMATION_DURATION)
       .attr('x', (d) => (d.x0! < width / 2 ? d.x1! + TEXT_PADDING : d.x0! - TEXT_PADDING))
       .attr('y', (d) => (d.y1! + d.y0!) / 2)
-      .style('opacity', 1)
-      .text((d) => `${getGateName(d)} (${d.totalNANDGates})`);
+      .style('opacity', 1);
   };
 };
 

@@ -45,6 +45,7 @@ const buildAllGateGraphData = (gatesWithCounts: {
 interface GateNode {
   gate: string;
   displayText?: string;
+  count: number;
   totalNANDGates: number;
 }
 interface GateLink {
@@ -67,18 +68,19 @@ export const buildSankeyLayoutGenerators = (gatesWithCounts: {
     const links: SankeyGateLink[] = [];
 
     if (gate === 'nand') {
-      nodes.push({ gate: 'in', displayText: 'NAND', totalNANDGates: 1 });
-      nodes.push({ gate: 'nand', displayText: 'NAND', totalNANDGates: 1 });
+      nodes.push({ gate: 'in', displayText: 'NAND', count: 1, totalNANDGates: 1 });
+      nodes.push({ gate: 'nand', displayText: 'NAND', count: 1, totalNANDGates: 1 });
       links.push({ source: 'in', target: 'nand', value: 1, totalNumGates: 1 });
     } else {
       const nodesById: { [gate: string]: SankeyGateNode } = {};
       const linksById: { [sourceTarget: string]: SankeyGateLink } = {};
       const traverseGraph = (graph: GateGraphData) => {
         if (!Object.prototype.hasOwnProperty.call(nodesById, graph.gate)) {
-          nodesById[graph.gate] = { gate: graph.gate, totalNANDGates: 0 };
+          nodesById[graph.gate] = { gate: graph.gate, count: 0, totalNANDGates: 0 };
           nodes.push(nodesById[graph.gate]);
         }
         nodesById[graph.gate].totalNANDGates += graph.totalNANDGates;
+        nodesById[graph.gate].count += graph.count;
 
         if (graph.childGateGraphs) {
           for (const childGraph of graph.childGateGraphs) {
