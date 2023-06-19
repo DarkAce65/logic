@@ -2,7 +2,8 @@ import { expect, test } from 'vitest';
 
 import type { Bool, Tuple, WithGateCounts } from '@/types';
 
-export const fromBinaryString = (binary: string): number => parseInt(binary, 2);
+export const simplifyBinaryString = (binary: string): string =>
+  binary.length > 2 ? `${parseInt(binary, 2)}_${binary.length}` : `${parseInt(binary, 2)}`;
 export const toBinaryString = (num: number, length: number): string => {
   if (num > Math.pow(2, length) - 1) {
     throw new Error(`${num} is too large to fit in ${length} bits`);
@@ -67,12 +68,10 @@ export function runSingleOutputMultibitLogicTests<
     const sortedTestCases = testCases.sort(([a], [b]) => a.join('').localeCompare(b.join('')));
     for (const [inputs, expected] of sortedTestCases) {
       const inputsString = inputs
-        .map((input) =>
-          Array.isArray(input) ? `${fromBinaryString(input.join(''))}_${input.length}` : input
-        )
+        .map((input) => (Array.isArray(input) ? simplifyBinaryString(input.join('')) : input))
         .join(', ');
       const expectedString = Array.isArray(expected)
-        ? `${fromBinaryString(expected.join(''))}_${expected.length}`
+        ? simplifyBinaryString(expected.join(''))
         : expected;
       test(`${logicGateName}(${inputsString}) === ${expectedString}`, () => {
         expect(gateFunction(...inputs)).toStrictEqual(expected);
@@ -93,7 +92,7 @@ export function runMultiOutputMultibitLogicTests<
     const sortedTestCases = testCases
       .map<[string, I, O]>(([i, e]) => [
         i
-          .map((input) => (Array.isArray(input) ? fromBinaryString(input.join('')) : input))
+          .map((input) => (Array.isArray(input) ? simplifyBinaryString(input.join('')) : input))
           .join(', '),
         i,
         e,
@@ -101,9 +100,7 @@ export function runMultiOutputMultibitLogicTests<
       .sort(([a], [b]) => a.localeCompare(b));
     for (const [inputsString, inputs, expected] of sortedTestCases) {
       const expectedString = `[${expected
-        .map((output) =>
-          Array.isArray(output) ? `${fromBinaryString(output.join(''))}_${output.length}` : output
-        )
+        .map((output) => (Array.isArray(output) ? simplifyBinaryString(output.join('')) : output))
         .join(', ')}]`;
       test(`${logicGateName}(${inputsString}) === ${expectedString}`, () => {
         expect(gateFunction(...inputs)).toStrictEqual(expected);
