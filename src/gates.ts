@@ -10,7 +10,10 @@ import { and16 } from './gates/multibit/and16';
 import { mux16 } from './gates/multibit/mux16';
 import { not16 } from './gates/multibit/not16';
 import { or16 } from './gates/multibit/or16';
+import { dmux4way } from './gates/multiplexer/dmux4way';
+import { dmux8way } from './gates/multiplexer/dmux8way';
 import { mux4way16 } from './gates/multiplexer/mux4way16';
+import { mux8way16 } from './gates/multiplexer/mux8way16';
 import { or8way } from './gates/multiplexer/or8way';
 import { nand } from './gates/nand';
 
@@ -25,7 +28,7 @@ export const ALL_GATES: {
   nand,
   basic: { and, dmux, mux, not, or, xor },
   multibit: { and16, mux16, not16, or16 },
-  multiplexer: { mux4way16, or8way },
+  multiplexer: { dmux4way, dmux8way, mux4way16, mux8way16, or8way },
 };
 
 export const FLATTENED_GATES = Object.keys(ALL_GATES).reduce<{
