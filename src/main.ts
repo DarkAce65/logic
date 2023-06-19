@@ -265,7 +265,10 @@ document.addEventListener('DOMContentLoaded', () => {
       )) {
         const option = document.createElement('option');
         option.value = gate;
-        option.text = gate.toUpperCase();
+        const totalNANDGates = gateGraphData[gate].totalNANDGates;
+        option.text = `${gate.toUpperCase()} (${
+          totalNANDGates === 1 ? `${totalNANDGates} NAND gate` : `${totalNANDGates} NAND gates`
+        })`;
         optionGroup.appendChild(option);
       }
       gateSelector.appendChild(optionGroup);
